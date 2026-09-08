@@ -35,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.width
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +95,7 @@ fun HomeScreen() {
                     title = "Events & Meetings",
                     description = "Discover upcoming community events",
                     onClick = {
-
+                        currentScreen = "events"
                     }
                 )
 
@@ -129,6 +130,11 @@ fun HomeScreen() {
                 onBack = {
                     currentScreen = "home"
                 }
+            )
+        }
+        "events" -> {
+            EventsScreen(
+                onBack = { currentScreen = "home" }
             )
         }
     }
@@ -259,6 +265,165 @@ fun AnnouncementsScreen(
                         color = Color.Gray
                     )
                 }
+            }
+        }
+    }
+}
+@Composable
+fun EventsScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(Color(0xFFF8F9FA))
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
+        Button(
+            onClick = onBack
+        ) {
+            Text("← Back")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Events & Meetings",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "Upcoming Events",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        EventCard(
+            date = "14 SEP",
+            title = "Community Meetup",
+            description = "Meet fellow residents and discuss upcoming society activities.",
+            location = "Community Hall",
+            time = "5:00 PM",
+            accentColor = Color(0xFF4F7CFF)
+        )
+        EventCard(
+            date = "21 SEP",
+            title = "Society Sports Day",
+            description = "A fun-filled sports day for residents of all age groups.",
+            location = "Society Ground",
+            time = "7:00 AM",
+            accentColor = Color(0xFF4CAF50)
+        )
+
+        EventCard(
+            date = "28 SEP",
+            title = "Residents Meeting",
+            description = "Monthly meeting to discuss society updates and resident concerns.",
+            location = "Community Hall",
+            time = "6:30 PM",
+            accentColor = Color(0xFF9C27B0)
+        )
+
+        EventCard(
+            date = "02 OCT",
+            title = "Festival Celebration",
+            description = "Join the community for an evening of celebration and activities.",
+            location = "Community Hall",
+            time = "6:00 PM",
+            accentColor = Color(0xFFFF9800)
+        )
+        EventCard(
+            date = "10 OCT",
+            title = "Community Clean-Up",
+            description = "Residents can join together for a community cleanliness drive.",
+            location = "Society Entrance",
+            time = "8:00 AM",
+            accentColor = Color(0xFF009688)
+        )
+    }
+}
+@Composable
+fun EventCard(
+    date: String,
+    title: String,
+    description: String,
+    location: String,
+    time: String,
+    accentColor: Color
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // Colored date section
+            Column(
+                modifier = Modifier
+                    .background(
+                        color = accentColor,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(
+                        horizontal = 12.dp,
+                        vertical = 14.dp
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = date,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Event information
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = description,
+                    color = Color.Gray,
+                    fontSize = 14.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "$location • $time",
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
             }
         }
     }
