@@ -225,7 +225,9 @@ fun AnnouncementsScreen(
         Text(
             text = "Announcements",
             fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -239,7 +241,10 @@ fun AnnouncementsScreen(
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 2.dp
-                )
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Black
+                ),
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp)
@@ -247,6 +252,7 @@ fun AnnouncementsScreen(
                     Text(
                         text = announcement.first,
                         fontSize = 19.sp,
+                        color = Color.White,
                         fontWeight = FontWeight.SemiBold
                     )
 
@@ -369,7 +375,10 @@ fun EventCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
-        )
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        ),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -406,6 +415,7 @@ fun EventCard(
                 Text(
                     text = title,
                     fontSize = 18.sp,
+                    color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
 
