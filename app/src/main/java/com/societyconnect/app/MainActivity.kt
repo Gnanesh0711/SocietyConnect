@@ -43,6 +43,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.OutlinedTextFieldDefaults
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+
 data class ServiceRequest(
     val title: String,
     val category: String,
@@ -123,7 +127,7 @@ fun HomeScreen() {
                     title = "Member Directory",
                     description = "Find and connect with residents",
                     onClick = {
-
+                        currentScreen = "member_directory"
                     }
                 )
 
@@ -131,7 +135,7 @@ fun HomeScreen() {
                     title = "Emergency Contacts",
                     description = "Quick access to important contacts",
                     onClick = {
-
+                        currentScreen = "emergency_contacts"
                     }
                 )
             }
@@ -150,6 +154,16 @@ fun HomeScreen() {
             )
         }
         "service_requests" -> ServiceRequestsScreen(
+            onBack = {
+                currentScreen = "home"
+            }
+        )
+        "member_directory" -> MemberDirectoryScreen(
+            onBack = {
+                currentScreen = "home"
+            }
+        )
+        "emergency_contacts" -> EmergencyContactsScreen(
             onBack = {
                 currentScreen = "home"
             }
@@ -699,6 +713,256 @@ fun ServiceRequestsScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+@Composable
+fun MemberDirectoryScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(Color(0xFFF8F9FA))
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
+        Button(
+            onClick = onBack
+        ) {
+            Text("← Back")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Member Directory",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Find residents in your society",
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Residents",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        MemberCard(
+            name = "Arun Kumar",
+            flat = "Block A • Flat 102",
+            role = "Resident"
+        )
+
+        MemberCard(
+            name = "Priya Sharma",
+            flat = "Block A • Flat 205",
+            role = "Resident"
+        )
+
+        MemberCard(
+            name = "Rahul Verma",
+            flat = "Block B • Flat 301",
+            role = "Resident"
+        )
+
+        MemberCard(
+            name = "Meena Krishnan",
+            flat = "Block B • Flat 405",
+            role = "Resident"
+        )
+
+        MemberCard(
+            name = "Vikram Rao",
+            flat = "Block C • Flat 201",
+            role = "Resident"
+        )
+    }
+}
+@Composable
+fun MemberCard(
+    name: String,
+    flat: String,
+    role: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = name,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = flat,
+                color = Color.LightGray,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = role,
+                color = Color.LightGray,
+                fontSize = 13.sp
+            )
+        }
+    }
+}
+@Composable
+fun EmergencyContactsScreen(
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(Color(0xFFF8F9FA))
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
+        Button(
+            onClick = onBack
+        ) {
+            Text("← Back")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Emergency Contacts",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Quick access to important contacts",
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        EmergencyContactCard(
+            title = "Security Desk",
+            number = "Available at society gate",
+            icon = "🛡"
+        )
+
+        EmergencyContactCard(
+            title = "Medical Emergency",
+            number = "Emergency services • 112",
+            icon = "🏥",
+            phoneNumber = "112"
+        )
+
+        EmergencyContactCard(
+            title = "Fire & Rescue",
+            number = "Emergency services • 112",
+            icon = "🚒",
+            phoneNumber = "112"
+        )
+
+        EmergencyContactCard(
+            title = "Society Maintenance",
+            number = "Available at society office",
+            icon = "🔧"
+        )
+    }
+}
+@Composable
+fun EmergencyContactCard(
+    title: String,
+    number: String,
+    icon: String,
+    phoneNumber: String? = null
+) {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = icon,
+                fontSize = 28.sp
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = number,
+                    color = Color.LightGray,
+                    fontSize = 13.sp
+                )
+            }
+
+            Button(
+                onClick = {
+                    phoneNumber?.let {
+                        val intent = Intent(
+                            Intent.ACTION_DIAL,
+                            Uri.parse("tel:$it")
+                        )
+                        context.startActivity(intent)
+                    }
+                }
+            ) {
+                Text("Call")
             }
         }
     }
