@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.*
 import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,37 +167,99 @@ fun HomeScreen() {
         }
     }
 
-    @Composable
-    fun AnnouncementsScreen(
-        onBack: () -> Unit
+@Composable
+fun AnnouncementsScreen(
+    onBack: () -> Unit
+) {
+    val announcements = listOf(
+        Triple(
+            "Water Supply Maintenance",
+            "Water supply will be temporarily unavailable tomorrow from 10 AM to 1 PM.",
+            "8 Sep 2026"
+        ),
+        Triple(
+            "Community Meeting",
+            "A society meeting will be held in the community hall this Saturday at 5 PM.",
+            "7 Sep 2026"
+        ),
+        Triple(
+            "Parking Area Cleaning",
+            "The basement parking area will be cleaned on Friday. Please move vehicles before 9 AM.",
+            "5 Sep 2026"
+        ),
+        Triple(
+            "Lift Maintenance",
+            "The lift in Block A will be unavailable for maintenance tomorrow from 2 PM to 4 PM.",
+            "4 Sep 2026"
+        ),
+        Triple(
+            "Garden Maintenance",
+            "The society garden will undergo routine maintenance this weekend. Please avoid the area during the work.",
+            "3 Sep 2026"
+        )
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(Color(0xFFF8F9FA))
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .background(Color(0xFFF8F9FA))
-                .padding(20.dp)
+
+        Button(
+            onClick = onBack
         ) {
-            Button(
-                onClick = onBack
+            Text("← Back")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Announcements",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        announcements.forEach { announcement ->
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                )
             ) {
-                Text("← Back")
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                    Text(
+                        text = announcement.first,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = announcement.second,
+                        color = Color.Gray
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = announcement.third,
+                        fontSize = 13.sp,
+                        color = Color.Gray
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Announcements",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "No announcements yet.",
-                fontSize = 18.sp,
-                color = Color.Gray
-            )
         }
     }
+}
