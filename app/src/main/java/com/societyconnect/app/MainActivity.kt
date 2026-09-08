@@ -36,7 +36,19 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.OutlinedTextFieldDefaults
 
+data class ServiceRequest(
+    val title: String,
+    val category: String,
+    val description: String,
+    val status: String
+)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +115,7 @@ fun HomeScreen() {
                     title = "Service Requests",
                     description = "Raise and track your requests",
                     onClick = {
-
+                        currentScreen = "service_requests"
                     }
                 )
 
@@ -137,6 +149,11 @@ fun HomeScreen() {
                 onBack = { currentScreen = "home" }
             )
         }
+        "service_requests" -> ServiceRequestsScreen(
+            onBack = {
+                currentScreen = "home"
+            }
+        )
     }
 }
     @Composable
@@ -434,6 +451,254 @@ fun EventCard(
                     color = Color.Gray,
                     fontSize = 13.sp
                 )
+            }
+        }
+    }
+}
+@Composable
+fun ServiceRequestsScreen(
+    onBack: () -> Unit
+) {
+    var showForm by remember { mutableStateOf(false) }
+    var requestTitle by remember { mutableStateOf("") }
+    var requestDescription by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+
+    val requests = remember { mutableStateListOf<ServiceRequest>() }
+    var requestCategory by remember { mutableStateOf("Maintenance") }
+    var categoryExpanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .background(Color(0xFFF8F9FA))
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
+
+        Button(
+            onClick = onBack
+        ) {
+            Text("← Back")
+        }
+        if (showForm) {
+            Text(
+                text = "Raise a Request",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 24.dp)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = requestTitle,
+                onValueChange = { requestTitle = it },
+                label = { Text("Request Title") },
+                textStyle = LocalTextStyle.current.copy(
+                    color = Color.Black
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedLabelColor = Color.Gray,
+                    unfocusedLabelColor = Color.Gray,
+                    cursorColor = Color.Black
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = requestCategory,
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Category") },
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedLabelColor = Color.Gray,
+                        unfocusedLabelColor = Color.Gray,
+                        cursorColor = Color.Black
+                    ),
+                    trailingIcon = {
+                        Text(
+                            text = "▼",
+                            color = Color.Gray,
+                            modifier = Modifier.clickable {
+                                categoryExpanded = !categoryExpanded
+                            }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = {
+                        categoryExpanded = false
+                    }
+                ) {
+                    listOf(
+                        "Maintenance",
+                        "Plumbing",
+                        "Electrical",
+                        "Cleaning",
+                        "Other"
+                    ).forEach { category ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(category)
+                            },
+                            onClick = {
+                                requestCategory = category
+                                categoryExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = requestDescription,
+                onValueChange = { requestDescription = it },
+                label = { Text("Description") },
+                textStyle = LocalTextStyle.current.copy(
+                    color = Color.Black
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedLabelColor = Color.Gray,
+                    unfocusedLabelColor = Color.Gray,
+                    cursorColor = Color.Black
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    showError = requestTitle.isBlank() || requestDescription.isBlank()
+
+                    if (!showError) {
+                        requests.add(
+                            ServiceRequest(
+                                title = requestTitle,
+                                category = requestCategory,
+                                description = requestDescription,
+                                status = "Submitted"
+                            )
+                        )
+                        showForm = false
+                        requestTitle = ""
+                        requestDescription = ""
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Submit Request")
+            }
+
+            if (showError) {
+                Text(
+                    text = "Please enter a title and description.",
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
+        if (!showForm) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Service Requests",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Raise and track your service requests",
+                color = Color.Gray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = {
+                    // Form will be added next
+                    showForm = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("＋ Raise a Request")
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "My Requests",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (requests.isEmpty()) {
+                Text(
+                    text = "No service requests yet.",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            } else {
+                requests.forEach { request ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = request.title,
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Text(
+                                text = "Category: ${request.category}\n\n${request.description}",
+                                color = Color.LightGray,
+                                fontSize = 14.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = "Status: ${request.status}",
+                                color = Color.LightGray,
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+                }
             }
         }
     }
