@@ -41,25 +41,40 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
 import androidx.compose.material3.OutlinedTextFieldDefaults
 
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
-
-data class ServiceRequest(
-    val title: String,
-    val category: String,
-    val description: String,
-    val status: String
-)
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.*
+import com.societyconnect.app.data.AuthRepository
+import com.societyconnect.app.data.ServiceRequestRepository
+import com.societyconnect.app.ui.AuthViewModel
+import com.societyconnect.app.ui.ServiceRequestsViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             SocietyConnectTheme {
-                HomeScreen()
+                val context = LocalContext.current
+                val authViewModel = remember {
+                    AuthViewModel(AuthRepository(context.applicationContext))
+                }
+                var isLoggedIn by remember { mutableStateOf(false) }
+
+                if (isLoggedIn) {
+                    HomeScreen()
+                } else {
+                    LoginScreen(
+                        viewModel = authViewModel,
+                        onLoginSuccess = {
+                            isLoggedIn = true
+                        }
+                    )
+                }
             }
         }
     }
@@ -473,12 +488,14 @@ fun EventCard(
 fun ServiceRequestsScreen(
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val viewModel = remember {
+        ServiceRequestsViewModel(ServiceRequestRepository(context.applicationContext))
+    }
+    val uiState by viewModel.uiState.collectAsState()
     var showForm by remember { mutableStateOf(false) }
     var requestTitle by remember { mutableStateOf("") }
     var requestDescription by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
-
-    val requests = remember { mutableStateListOf<ServiceRequest>() }
     var requestCategory by remember { mutableStateOf("Maintenance") }
     var categoryExpanded by remember { mutableStateOf(false) }
     Column(
@@ -599,17 +616,7 @@ fun ServiceRequestsScreen(
 
             Button(
                 onClick = {
-                    showError = requestTitle.isBlank() || requestDescription.isBlank()
-
-                    if (!showError) {
-                        requests.add(
-                            ServiceRequest(
-                                title = requestTitle,
-                                category = requestCategory,
-                                description = requestDescription,
-                                status = "Submitted"
-                            )
-                        )
+                    if (viewModel.submit(requestTitle, requestCategory, requestDescription)) {
                         showForm = false
                         requestTitle = ""
                         requestDescription = ""
@@ -620,9 +627,9 @@ fun ServiceRequestsScreen(
                 Text("Submit Request")
             }
 
-            if (showError) {
+            uiState.error?.let { error ->
                 Text(
-                    text = "Please enter a title and description.",
+                    text = error,
                     color = Color.Red,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -651,7 +658,7 @@ fun ServiceRequestsScreen(
 
             Button(
                 onClick = {
-                    // Form will be added next
+                    viewModel.clearError()
                     showForm = true
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -668,14 +675,16 @@ fun ServiceRequestsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (requests.isEmpty()) {
+            if (uiState.isLoading) {
+                Text("Loading requests…", color = Color.Gray, modifier = Modifier.padding(vertical = 16.dp))
+            } else if (uiState.requests.isEmpty()) {
                 Text(
                     text = "No service requests yet.",
                     color = Color.Gray,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             } else {
-                requests.forEach { request ->
+                uiState.requests.forEach { request ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -964,6 +973,241 @@ fun EmergencyContactCard(
             ) {
                 Text("Call")
             }
+        }
+    }
+}
+@Composable
+fun LoginScreen(
+    viewModel: AuthViewModel,
+    onLoginSuccess: () -> Unit
+) {
+    var showRegisterScreen by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
+    if (showRegisterScreen) {
+        RegisterScreen(
+            viewModel = viewModel,
+            onBack = {
+                viewModel.clearRegistrationState()
+                showRegisterScreen = false
+            }
+        )
+        return
+    }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        Image(
+            painter = painterResource(R.drawable.ic_society_connect),
+            contentDescription = "SocietyConnect logo",
+            modifier = Modifier.size(92.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "SocietyConnect",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Society Management Application",
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedLabelColor = Color(0xFF3F7FF5),
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = Color(0xFF3F7FF5),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color(0xFF3F7FF5)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedLabelColor = Color(0xFF3F7FF5),
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = Color(0xFF3F7FF5),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color(0xFF3F7FF5)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                if (viewModel.login(email, password)) {
+                    onLoginSuccess()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Login")
+        }
+        uiState.loginError?.let { error ->
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = error,
+                color = Color.Red
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(
+            onClick = {
+                showRegisterScreen = true
+
+            }
+        ) {
+            Text("Don't have an account? Register")
+        }
+    }
+}
+@Composable
+fun RegisterScreen(
+    viewModel: AuthViewModel,
+    onBack: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    LaunchedEffect(uiState.registrationComplete) {
+        if (uiState.registrationComplete) onBack()
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+            .padding(24.dp)
+    ) {
+
+        TextButton(onClick = onBack) {
+            Text("← Back")
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "Create Account",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Register as a society resident",
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Full Name") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedLabelColor = Color(0xFF3F7FF5),
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = Color(0xFF3F7FF5),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color(0xFF3F7FF5)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedLabelColor = Color(0xFF3F7FF5),
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = Color(0xFF3F7FF5),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color(0xFF3F7FF5)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedLabelColor = Color(0xFF3F7FF5),
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = Color(0xFF3F7FF5),
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color(0xFF3F7FF5)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                viewModel.register(name, email, password)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
+        }
+
+        uiState.registrationError?.let { error ->
+            Text(
+                text = error,
+                color = Color.Red,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }
