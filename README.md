@@ -194,25 +194,25 @@ The application was tested on an Android device using the following flows:
 ## Screenshots
 
 ### Login
-<img src="01-login.jpg" alt="Login" width="300"/>
+<img src="screenshots/01-login.jpg" alt="Login" width="300"/>
 
 ### Dashboard
-<img src="02-dashboard.jpg" alt="Dashboard" width="300"/>
+<img src="screenshots/02-dashboard.jpg" alt="Dashboard" width="300"/>
 
 ### Announcements
-<img src="03-announcements.jpg" alt="Announcements" width="300"/>
+<img src="screenshots/03-announcements.jpg" alt="Announcements" width="300"/>
 
 ### Events & Meetings
-<img src="04-events.jpg" alt="Events" width="300"/>
+<img src="screenshots/04-events.jpg" alt="Events" width="300"/>
 
 ### Service Requests
-<img src="05-service-requests.jpg" alt="Service Requests" width="300"/>
+<img src="screenshots/05-service-requests.jpg" alt="Service Requests" width="300"/>
 
 ### Member Directory
-<img src="06-member-directory.jpg" alt="Member Directory" width="300"/>
+<img src="screenshots/06-member-directory.jpg" alt="Member Directory" width="300"/>
 
 ### Emergency Contacts
-<img src="07-emergency-contacts.jpg" alt="Emergency Contacts" width="300"/>
+<img src="screenshots/07-emergency-contacts.jpg" alt="Emergency Contacts" width="300"/>
 
 ## Known Limitations
 
